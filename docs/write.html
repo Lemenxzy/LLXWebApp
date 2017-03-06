@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="css/style.css" rel="stylesheet" />
+		<style>
+			.btn{width:80%;}
+			#btn{text-align: center;margin-top:30px;}
+		</style>
+	</head>
+
+	<body id="body">
+		<header id="header" class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title" id="bigtittle"></h1>
+		</header>
+		
+		
+		<div class="mui-content" id="writewrap">
+			    <div class="mui-input-row" style="margin: 10px 5px;">
+			        <input type="text" class="mui-input-clear" placeholder="标题" id="tittle">
+			    </div>
+ 				<div class="mui-content-padded">
+			        <select class="mui-btn mui-btn-block" id="select">
+						<option value="item-1">军事训练</option>
+						<option value="item-2">文化学习</option>
+						<option value="item-3">日常管理</option>
+						<option value="item-4">其它</option>
+					</select>
+			    </div>
+				<textarea id="textarea" rows="5" placeholder="多行文本框"></textarea>
+		</div>
+		<div id="btn">
+			<a href="javascript:void(0)" class="mui-btn mui-btn-primary btn">提交</a>
+		</div>
+		
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript" src="../js/util.js" ></script>
+		<script type="text/javascript">
+			mui.init();
+			var typecontent = "";
+			var wirte = function(){
+				self.type = "";
+			}
+			
+			wirte.prototype.main = function(){
+				var self = this;
+				
+				window.addEventListener('mywrite',function(event){
+				  //获得事件参数
+				  var type = event.detail.type;
+				  self.ryppefn(type);
+				  self.wirtetittle(type);
+				});
+				
+				mui("#btn").on('tap',".btn",function(){
+					self.sublimee();
+				});
+				
+				self.wirtetittle();
+			}
+			
+			wirte.prototype.ryppefn = function(type){
+				var self = this;
+				util.doc("body").setAttribute("data-type",type);
+				
+			}
+			
+			wirte.prototype.wirtetittle = function(type){
+				var self = this;
+				if( type == "content"){
+					mui("#bigtittle")[0].innerHTML = "写文章"
+				}else{
+					mui("#bigtittle")[0].innerHTML = "提问题"
+				}
+			}
+			
+			wirte.prototype.sublimee = function(){
+				var self = this,
+						tittle,
+						tag,
+						content,
+						index,
+						type,
+						url,
+						data;
+				index = util.doc('select').selectedIndex;
+				tittle = util.doc('tittle').value;
+				content = util.doc('textarea').value;
+				tag = util.doc('select').options[index].text;
+				type = util.doc("body").getAttribute("data-type");
+				util.doc('textarea').blur();
+				util.doc('tittle').blur();
+				if(type == "question"){
+					var userid = plus.storage.getItem("userId")*1;
+					url = "/Ltdemo/question/save.do";
+					data = {tittle:tittle,content:content,tag:tag,userid:userid};
+				}else{
+					url = "/Ltdemo/content/save.do"
+					var userid = plus.storage.getItem("userId")*1;
+					var username = plus.storage.getItem("username");
+					var userimg =  plus.storage.getItem("userimg");
+					data = {tittle:tittle,content:content,keywords:tag,username:username,userimg:userimg,userid:userid};
+				}
+				if(util.isnotEmpty(tittle) && util.isnotEmpty(content)){
+						util.ajax({
+						type:"post", 
+						data:data,
+						url:url, 
+						success:function(data){
+							if(data.success===1){
+								if(data.data === "success"){
+									mui.alert('提交成功','成功！','确定',function (e) {
+										 e.index
+										 util.doc('tittle').value="";
+										 util.doc('textarea').value="";
+									},'div');
+								}else if(data.data === "fail"){
+									mui.alert('提交失败','错误！','确定',function (e) {
+									   e.index
+									},'div') 
+								}else if(data.data === "null"){
+									mui.alert('不能为空','错误！','确定',function (e) {
+									   e.index
+									},'div')
+								}else{
+									mui.alert('提交失败','错误！','确定',function (e) {
+									   e.index
+									},'div')
+								}
+							}else{
+								mui.alert('服务器连接异常','错误！','确定',function (e) {
+								   e.index
+								},'div')
+							}
+						}
+					})
+				}else{
+					mui.alert('不能为空','错误！','确定',function (e) {
+									   e.index
+					},'div')
+				}
+			}
+			
+			
+			
+			
+			var w = new wirte();
+			w.main();
+			
+		</script>
+	</body>
+
+</html>

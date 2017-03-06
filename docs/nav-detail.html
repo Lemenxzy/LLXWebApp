@@ -1,0 +1,266 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="css/style1.css" rel="stylesheet" />
+		<style>
+			.myslide1{height:100%;}
+			.mui-slider .slide-wrapper{position: absolute;top: 40px;left: 0px;right: 0px;bottom: 0px;}
+			.mui-slider-item .qustion-list .questionbox{width:42px;}
+			.mui-slider-item .qustion-list .didanswer{background:#2870b7;}
+			.mui-slider-item .qustion-list .noanswer{background: #f32a2b;}
+			.mui-slider-item .qustion-list .questionbox p{line-height:normal;color:#fff;text-align:center;line-height:20px;}
+			.mui-slider-item .qustion-list .questionbox .number{font-size:20px;margin-top:2px;}
+			.mui-slider-item .qustion-list .listmessage .userdate{font-size:12px;}
+			.mui-slider-item .qustion-list .listmessage .mui-ellipsis{color:#000;}
+			.mui-slider-item .wiki-list .mui-media-body  p{font-size: 16px;line-height:42px;color:#333;}
+			.mui-slider-item .content-list .mui-pull-left{float: none;}
+			.mui-slider-item .content-list .userlogomessage{float:left;margin-right:6px;}
+			.mui-slider-item .content-list .userlogomessage img{border-radius:40px;}
+			.mui-slider-item .content-list .userlogomessage p{
+				width:42px;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				-o-text-overflow: ellipsis;
+				overflow: hidden;
+				color:#333;
+			}
+			.mui-slider-item .content-list .mui-media-body p{line-height:39px;}
+			.mui-slider-item .content-list .mui-media-body .title{color:#333;font-size:16px;}
+			.mui-slider-item .content-list .zan{padding-top: 14px;text-align:right;}
+			.mui-table-view-cell>a:not(.mui-btn).mui-active{background: transparent;}
+		</style>
+	</head>
+
+	<body>
+		<header id="header" class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title mui-nav-title" id="htittle"></h1>
+		</header>
+		<div class="mui-content">
+			<!--底部选项卡-->
+			<div id="slider" class="mui-slider mui-search-slider myslide1">
+				<div id="sliderSegmentedControl" class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+					<a class="mui-control-item" href="#item1mobile">
+						wiki
+					</a>
+					<a class="mui-control-item" href="#item2mobile">
+						动态
+					</a>
+					<a class="mui-control-item" href="#item3mobile">
+						热门
+					</a>
+				</div>
+				<div id="sliderProgressBar" class="mui-slider-progress-bar mui-col-xs-4"></div>
+				<div class="mui-slider-group mui-search-slidergroup slide-wrapper" id="itemwrapper">
+					<div id="item1mobile" class="mui-slider-item mui-control-content mui-active">
+						<div id="scroll1" class="mui-scroll-wrapper">
+							<div class="mui-scroll">
+								<ul class="mui-table-view wikicontentwarper">
+									
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div id="item2mobile" class="mui-slider-item mui-control-content">
+						<div id="scroll2" class="mui-scroll-wrapper">
+							<div class="mui-scroll">
+									<ul class="mui-table-view">
+								
+									</ul>
+							</div>
+						</div>
+
+					</div>
+					<div id="item3mobile" class="mui-slider-item mui-control-content">
+						<div id="scroll3" class="mui-scroll-wrapper">
+							<div class="mui-scroll">
+								<ul class="mui-table-view">
+							
+								</ul>
+							</div>
+						</div>
+					</div>			
+				</div>
+			</div>
+		</div>		
+
+		
+			
+
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/util.js"></script>
+			<script type="text/javascript">
+			mui.init({
+				swipeBack: false
+			});
+			
+			mui('.mui-scroll-wrapper').scroll({
+				indicators: true //是否显示滚动条
+			});
+				
+			var wiki = function(){
+				
+			
+			}
+			
+			
+			wiki.prototype.main = function(){
+				var self = this;
+				self.getwikijson();
+				self.getcontent();
+				self.gethotqs();
+				mui("#htittle")[0].innerHTML = localStorage.getItem("lstype");
+				/*console.log(localStorage.getItem("lstype"))
+				mui("#htittle")[0].innerHTML = localStorage.getItem("lstype");
+				mui("#htittle2")[0].innerHTML = localStorage.getItem("lstype");*/
+				mui("#itemwrapper").on('tap',".mui-table-view .a-list",function(){
+				var tid = this.getAttribute('data-qsid'); 
+				var type = this.getAttribute('data-lstype');
+				localStorage.setItem("detailid",tid);
+				localStorage.setItem("lstype",type);
+				var nwaiting = plus.nativeUI.showWaiting();//显示原生等待框
+			    webviewContent= plus.webview.create("detail.html");//后台创建webview并打开show.html
+			    webviewContent.addEventListener("loaded", function() { //注册新webview的载入完成事件
+			    	var ws = plus.webview.getWebviewById('detail');
+			        nwaiting.close(); //新webview的载入完毕后关闭等待框
+		        	webviewContent.show("slide-in-right",200); //把新webview窗体显示出来，显示动画效果为速度200毫秒的右侧移入动画
+				}, false);
+				})
+				
+			}
+			
+			wiki.prototype.getwikijson = function(){
+				var self = this,
+					targetId = localStorage.getItem("detailid");
+				util.ajax({
+					url:"/Ltdemo/wiki/detail.do",
+					type:"post",
+					data:{id:targetId},
+					success:function(data){
+						self.drawwdetail(data.data);
+					}
+				});
+			}
+			
+			wiki.prototype.drawwdetail = function(data){
+				var self = this;
+					arr=[];
+				arr.push('<div class="mui-wiki-title mui-clearfix">');
+					arr.push('<div class="mui-wiki-logo">');
+						arr.push('<img src=../'+data.images+' alt="logo" />');
+					arr.push('</div>');
+					arr.push('<h4>'+data.tittle+'</h4>');
+				arr.push('</div>');
+				arr.push('<div class="mui-wiki-content">');
+					arr.push('<p>'+data.content+'</p>');
+				arr.push('</div>');
+				arr.push('<p class="creat_time">'+util.getLocalTime(data.creatTime)+'创建</p>');
+				mui("#scroll1 .wikicontentwarper")[0].innerHTML = arr.join("");
+			}
+			
+			
+			wiki.prototype.getcontent = function(){
+				var self = this,
+					key = localStorage.getItem("lstype");
+				util.ajax({
+					url:"/Ltdemo/wiki/contentlist.do",
+					type:"post",
+					data:{key:key},
+					success:function(data){
+						if(data.success===1){
+							if(data.data instanceof Object){
+							self.drawwcontent(data.data);
+							}else if(data.data === "fail"){
+								mui("#scroll2 .mui-table-view")[0].innerHTML = "<p style='text-align:center;padding:20px 0;'>暂无数据</p>";
+							}else if(data.data === "null"){
+								mui("#scroll2 .mui-table-view")[0].innerHTML = "<p style='text-align:center;padding:20px 0;'>暂无数据</p>";
+							}else{
+								mui("#scroll2 .mui-table-view")[0].innerHTML = "<p style='text-align:center;padding:20px 0;'>暂无数据</p>";
+							}
+						}  
+						
+					}
+				});
+			}
+			
+			
+			wiki.prototype.drawwcontent = function(arr){
+				var self = this,
+					arrstr = [];
+				for (var i=0; i<arr.length; i++) {
+					arrstr.push('<li class="mui-table-view-cell  a-list content-list" data-lstype="content" data-qsid='+arr[i].id+'>')
+				            arrstr.push('<div class="userlogomessage">')
+				            	arrstr.push('<img class="mui-media-object mui-pull-left" src="../'+arr[i].userimg+'">')
+				            	arrstr.push('<p>'+arr[i].author+'</p>')
+				            arrstr.push('</div>')
+				            arrstr.push('<div class="mui-media-body">')
+				                arrstr.push('<p class="title">'+arr[i].title+'</p>')
+				                arrstr.push('<p class="mui-ellipsis">'+arr[i].description+'</p>')
+				            arrstr.push('</div>')
+						    arrstr.push('<p class="zan">')
+								arrstr.push('<span> · '+util.formatMsgTime(arr[i].creatTime,arr[i].nowTime)+'</span>')
+								arrstr.push('<span> ·  '+arr[i].commenthits+'评论</span>')
+							arrstr.push('</p>')
+				    arrstr.push('</li>')
+				};
+				mui("#scroll2 .mui-table-view")[0].innerHTML = arrstr.join("");
+			}
+			
+			wiki.prototype.gethotqs = function(){
+				var self = this,
+					key = localStorage.getItem("lstype");
+				util.ajax({
+					url:"/Ltdemo/wiki/qsttlist.do",
+					type:"post",
+					data:{key:key},
+					success:function(data){ 
+						if(data.success===1){
+							if(data.data instanceof Object){
+							self.drawwquest(data.data);
+							}else if(data.data === "fail"){
+								mui("#scroll3 .mui-table-view")[0].innerHTML = "<p style='text-align:center;padding:20px 0;'>暂无数据</p>";
+							}else if(data.data === "null"){
+								mui("#scroll3 .mui-table-view")[0].innerHTML = "<p style='text-align:center;padding:20px 0;'>暂无数据</p>";
+							}else{
+								mui("#scroll3 .mui-table-view")[0].innerHTML = "<p style='text-align:center;padding:20px 0;'>暂无数据</p>";
+							}
+						}
+						
+					}
+				});
+			}
+			
+			
+			wiki.prototype.drawwquest = function(arr){
+				var self = this,
+					arrstr = [];
+				for (var i=0; i<arr.length; i++) {
+					arrstr.push('<li class="mui-table-view-cell mui-media qustion-list">');
+				        arrstr.push('<a href="javascript:void(0);" class="a-list" data-lstype="question" data-qsid='+arr[i].id+'>')
+				            arrstr.push('<div class="mui-media-object mui-pull-left questionbox didanswer">')
+				            	arrstr.push('<p class="number">'+ arr[i].tidnum +'</p>')
+				            	arrstr.push('<p>回答</p>')
+				            arrstr.push('</div>')
+				            arrstr.push('<div class="mui-media-body listmessage">') 
+				                arrstr.push('<p class="userdate">'+arr[i].username+' · <span class="date">'+util.formatMsgTime(arr[i].creatTime,arr[i].nowDate)+'</span></p>')
+				                arrstr.push('<p class="mui-ellipsis">'+arr[i].tittle+'</p>')
+				            arrstr.push('</div>')
+				        arrstr.push('</a>')
+				    arrstr.push('</li>')
+				};
+				mui("#scroll3 .mui-table-view")[0].innerHTML = arrstr.join("");
+			}
+			
+			
+			var w = new wiki();
+			w.main();
+			
+		
+		</script>
+	</body>
+
+</html>

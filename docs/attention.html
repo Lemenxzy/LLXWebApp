@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="css/style.css" rel="stylesheet" />
+		<style>
+			.typecontent{position: absolute;top: 0px;bottom: 0px;right: 0;left: 0;} 
+			.typecontent .nocontent{position:absolute;top:50%;font-size:14px;color:#C0C0C0;text-align: center;width: 100%;} 
+			/*下拉列表样式*/
+			.mui-slider-item .qustion-list .questionbox{width:42px;}
+			.mui-slider-item .qustion-list .didanswer{background:#2870b7;}
+			.mui-slider-item .qustion-list .noanswer{background: #f32a2b;}
+			.mui-slider-item .qustion-list .questionbox p{line-height:normal;color:#fff;text-align:center;line-height:20px;}
+			.mui-slider-item .qustion-list .questionbox .number{font-size:20px;margin-top:2px;}
+			.mui-slider-item .qustion-list .listmessage .userdate{font-size:12px;}
+			.mui-slider-item .qustion-list .listmessage .mui-ellipsis{color:#000;}
+			.mui-slider-item .wiki-list .mui-media-body  p{font-size: 16px;line-height:42px;color:#333;}
+			.mui-slider-item .content-list .mui-pull-left{float: none;}
+			.mui-slider-item .content-list .userlogomessage{float:left;margin-right:6px;}
+			.mui-slider-item .content-list .userlogomessage img{border-radius:40px;}
+			.mui-slider-item .content-list .userlogomessage p{
+				width:42px;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				-o-text-overflow: ellipsis;
+				overflow: hidden;
+				color:#333;
+			}
+			.mui-slider-item .content-list .mui-media-body p{line-height:39px;}
+			.mui-slider-item .content-list .mui-media-body .title{color:#333;font-size:16px;}
+			.mui-slider-item .content-list .zan{padding-top: 14px;text-align:right;}
+			.mui-table-view-cell>a:not(.mui-btn).mui-active{background: transparent;}
+			
+		</style>
+	</head>
+	<body id="body">
+		<div class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title" id="htittle"></h1>
+		</div>
+		<div class="mui-content typecontent mui-scroll-wrapper mui-slider-item" id="itemwrapper">
+			<div class="mui-scroll">
+				<ul class="mui-table-view" id="listwrapper">
+					
+				</ul>
+			</div>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript" src="../js/util.js" ></script>
+		<script type="text/javascript">
+			mui.init();
+			mui('.mui-scroll-wrapper').scroll({
+				indicators: true //是否显示滚动条
+			});
+			var attention = function(){};
+			attention.prototype.main = function(){
+				var self = this;
+				var tittle = document.getElementById('htittle');
+				var type = localStorage.getItem("typelist");
+				mui.plusReady(function(){
+				        if(type == 'mylove'){
+							tittle.innerHTML = "我的收藏";
+							self.getlovedetail("/Ltdemo/love/findlovecontent.do",type);
+						}else if(type == 'mysee'){
+							tittle.innerText = "我的关注";
+							self.getlovedetail("/Ltdemo/love/findseeqslist.do",type);
+						}else if(type == 'myquestion'){
+							tittle.innerText = "我的提问";
+							self.getlovedetail("/Ltdemo/question/mylist.do",type);
+						}else if(type == 'myanswer'){
+							tittle.innerHTML = "我的回答";
+							self.getlovedetail("/Ltdemo/question/myanswer.do",type);
+						}else if(type == 'mycontent'){
+							tittle.innerHTML = "我的文章";
+							self.getlovedetail("/Ltdemo/content/mycontent.do",type); 
+						}else{
+							tittle.innerHTML = "错误";
+						}
+					    });
+				self.tabonclick();
+			}
+			
+			
+			attention.prototype.tabonclick = function(){
+				mui("#itemwrapper").on('tap',".mui-table-view .a-list",function(){
+				var tid = this.getAttribute('data-qsid');
+				var type = this.getAttribute('data-lstype');
+				localStorage.setItem("detailid",tid);
+				localStorage.setItem("lstype",type);
+				var nwaiting = plus.nativeUI.showWaiting();//显示原生等待框
+			    webviewContent= plus.webview.create("detail.html");//后台创建webview并打开show.html
+			    webviewContent.addEventListener("loaded", function() { //注册新webview的载入完成事件
+			    	var ws = plus.webview.getWebviewById('detail');
+			        nwaiting.close(); //新webview的载入完毕后关闭等待框
+		        	webviewContent.show("slide-in-right",200); //把新webview窗体显示出来，显示动画效果为速度200毫秒的右侧移入动画
+				}, false);
+				})
+			}
+			
+			attention.prototype.getlovedetail = function(url,type){
+				var self = this,
+					userid =  plus.storage.getItem("userId");
+				util.ajax({
+					type:"post",
+					url:url,
+					data:{userid:userid},
+					success:function(data){
+						
+						if(data.success == 1){
+							if(data.data instanceof Object){
+								if(type == 'mylove'){
+									self.drawmylove(data.data);
+								}else if(type == 'mysee'){
+									self.drawmysee(data.data);
+								}else if(type == 'myquestion'){
+									self.drawmysee(data.data);
+								}else if(type == 'myanswer'){
+									self.drawmysee(data.data); 
+								}else if(type == 'mycontent'){
+									self.drawmylove(data.data);
+								}else{
+								}
+							}else if(data.data == "fail"){
+								util.doc('itemwrapper').innerHTML = '<p class="nocontent">暂无数据</p>';
+							}else if(data.data == "null"){
+								util.doc('itemwrapper').innerHTML = '<p class="nocontent">暂无数据</p>';
+							}else{
+								util.doc('itemwrapper').innerHTML = '<p class="nocontent">暂无数据</p>';
+							}
+						}else{
+							alert("服务器异常")
+						}
+					}
+				})
+			}
+			
+			
+			attention.prototype.drawmylove = function(arr){
+				var self = this,
+					arrstr=[];
+				for (var i=0; i<arr.length; i++) {
+				    arrstr.push('<li class="mui-table-view-cell  a-list content-list" data-lstype="content" data-qsid='+arr[i].id+'>')
+				            arrstr.push('<div class="userlogomessage">')
+				            	arrstr.push('<img class="mui-media-object mui-pull-left" src="../'+arr[i].userimg+'">')
+				            	arrstr.push('<p>'+arr[i].author+'</p>')
+				            arrstr.push('</div>')
+				            arrstr.push('<div class="mui-media-body">')
+				                arrstr.push('<p class="title">'+arr[i].title+'</p>')
+				                arrstr.push('<p class="mui-ellipsis">'+arr[i].description+'</p>')
+				            arrstr.push('</div>')
+						    arrstr.push('<p class="zan">')
+								arrstr.push('<span> · '+util.formatMsgTime(arr[i].creatTime,arr[i].nowTime)+'</span>')
+								arrstr.push('<span> ·  '+arr[i].commenthits+'评论</span>')
+							arrstr.push('</p>')
+				    arrstr.push('</li>')
+				};
+				util.doc('listwrapper').innerHTML = arrstr.join("");
+			}
+			
+			attention.prototype.drawmysee = function(arr){
+				var self = this,
+					arrstr=[];
+				for (var i=0; i<arr.length; i++) {
+					arrstr.push('<li class="mui-table-view-cell mui-media qustion-list">');
+				        arrstr.push('<a href="javascript:void(0);" class="a-list" data-lstype="question" data-qsid='+arr[i].id+'>')
+				            arrstr.push('<div class="mui-media-object mui-pull-left questionbox didanswer">')
+				            	arrstr.push('<p class="number">'+ arr[i].tidnum +'</p>')
+				            	arrstr.push('<p>回答</p>')
+				            arrstr.push('</div>')
+				            arrstr.push('<div class="mui-media-body listmessage">')
+				                arrstr.push('<p class="userdate">'+arr[i].username+' · <span class="date">'+util.formatMsgTime(arr[i].creatTime,arr[i].nowDate)+'</span></p>')
+				                arrstr.push('<p class="mui-ellipsis">'+arr[i].tittle+'</p>')
+				            arrstr.push('</div>')
+				        arrstr.push('</a>')
+				    arrstr.push('</li>')
+				}
+				util.doc('listwrapper').innerHTML = arrstr.join("");
+			}
+			
+			
+			
+			var a = new attention();
+			a.main();
+	
+			
+		</script>
+	</body>
+
+</html>

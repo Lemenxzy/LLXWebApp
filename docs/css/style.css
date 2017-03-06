@@ -1,0 +1,18 @@
+.ui-page-login,
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+	font-family: "微软雅黑";
+}
+.mui-content{height: 100%;}
+input, select, textarea{font-family: "微软雅黑";}
+.mui-input-row label{font-family: "微软雅黑";}
+.mui-bar{
+	background: #2870b7;
+}
+.mui-bar-nav.mui-bar .mui-icon{
+	font-weight: bold;color:#fff;
+}
+.mui-title{color:#fff;}

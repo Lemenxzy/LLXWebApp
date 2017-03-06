@@ -1,0 +1,377 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/icons-extra.css" rel="stylesheet" />
+		<link href="css/style1.css" rel="stylesheet" />
+		<style>
+			.contentwrap{height: 100%;margin: 0;}
+			.mui-content-padded{margin:10px 0;}
+    		.mui-buttomblock span{font-size:18px;}
+    		.mui-ellipsis{overflow: auto;white-space: initial;text-overflow: initial;}
+    		.font-size{font-size:12px;color:#C0C0C0;}
+    		.talkcontentwarpper{margin-bottom: 50px;}
+    		h5{text-align:center;}
+		</style>
+	</head>
+
+	<body>
+		<header id="header" class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title" id="htittle"></h1>
+		</header>
+		<div class="mui-content contentwrap" id="bigwrap">
+			<div class="mui-content-padded mui-article" id="contentwrap">
+				
+			</div>
+			<div>
+				<h5 id="talktittle"></h5>
+				<ul class="mui-table-view talkcontentwarpper" id="talkcontentwarpper">
+				  
+				</ul>
+			</div>
+			
+			<div class="mui-buttomblock mui-row" id="btnbox">
+				
+			</div>
+		</div>
+
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript" src="../js/util.js" ></script>
+		<script type="text/javascript">
+			mui.init()
+			
+			var detail = function(){
+				this.btnbox = mui("#btnbox")[0];
+				this.contentbox = util.doc('contentwrap');
+			}
+			
+			detail.prototype.main = function(){
+				var self = this,
+					arr = [];
+				var targetId = localStorage.getItem("detailid"); 
+				var targetType = localStorage.getItem("lstype"); 
+				if(targetType == "question"){
+					self.getqdjson(targetId,"/Ltdemo/question/detail.do");
+					mui("#htittle")[0].innerHTML = "问题";
+					mui("#talktittle")[0].innerHTML = "回答"
+					arr.push('<button type="button" class="mui-btn  mui-col-sm-6 mui-col-xs-6 seebtn" data-type="see">');
+						arr.push('<span class="mui-icon-extra mui-icon-extra-heart"></span> 关注');
+					arr.push('</button>');
+					arr.push('<button type="button" class="mui-btn  mui-col-sm-6 mui-col-xs-6 asbtn">');
+						arr.push('<span class="mui-icon  mui-icon-chatbubble"></span> 回答');
+					arr.push('</button>');
+					self.btndraw(arr);
+				}else if(targetType == "content"){
+					self.getqdjson(targetId,"/Ltdemo/content/detail.do");
+					mui("#htittle")[0].innerHTML = "文章";
+					mui("#talktittle")[0].innerHTML = "评论"
+					arr.push('<button type="button" class="mui-btn  mui-col-sm-6 mui-col-xs-6 seebtn" data-type="love">');
+						arr.push('<span class="mui-icon  mui-icon-star"></span> 收藏');
+					arr.push('</button>');
+					arr.push('<button type="button" class="mui-btn  mui-col-sm-6 mui-col-xs-6 asbtn">');
+						arr.push('<span class="mui-icon  mui-icon-chatbubble"></span> 评论');
+					arr.push('</button>');
+					self.btndraw(arr);
+				}/*else{
+					mui("#htittle")[0].innerHTML = "wiki";
+					document.getElementById("bigwrap").removeChild(self.btnbox);
+					self.getqdjson(targetId,"/Ltdemo/wiki/detail.do");
+				}*/
+			 	
+			 	self.gettalkjson(targetId,targetType);
+			 	
+			 	mui(self.btnbox).on('tap','.seebtn',function(){
+			 			var value = plus.storage.getItem("userId");
+						if(value!==null){
+							self.seeanlove(this.getAttribute("data-type"),targetId);
+						}else{
+							self.openloginviews();
+						}
+				}, false);
+				
+				mui(self.btnbox).on('tap','.asbtn',function(e){
+					var value = plus.storage.getItem("userId"); 
+					if(value!==null){
+						var str,
+				 			num;
+				 		if(targetType == "question"){
+				 			str = '请输入你的回答：';
+				 			num = 1;
+				 		}else{
+				 			str = '请输入你的评论：';
+				 			num = 0;
+				 		}
+			 	 		e.detail.gesture.preventDefault(); //修复iOS 8.x平台存在的bug，使用plus.nativeUI.prompt会造成输入法闪一下又没了
+						var btnArray = ['取消', '确定'];
+						mui.prompt(str, '消息','', btnArray, function(e) {
+							if (e.index == 1) {
+								if(util.isnotEmpty(e.value)){
+									self.savetalkcontent(e.value,num,targetId);
+								}else{
+									mui.toast('不能为空')
+								}
+							}
+						})
+					}else{
+						self.openloginviews();
+					}
+				}, false);
+			}
+			
+			detail.prototype.openloginviews = function(){
+				mui.openWindow({
+					url: 'login.html',
+					id: 'login',
+					preload: true,
+					show: {
+						aniShow: 'pop-in'
+					},
+					styles: {
+						popGesture: 'hide'
+					},
+					waiting: {
+						autoShow: false
+					}
+				});
+			}
+			
+			detail.prototype.gettalkjson = function(id,type){
+				var self = this,
+					url;
+					if(type === "question"){
+						url = "/Ltdemo/talk/findanser.do";
+					}else{
+						url = "/Ltdemo/talk/findcttalk.do";
+					}
+				util.ajax({
+					type:"post",
+					data:{id:id},
+					url:url,
+					success:function(data){
+						if(data.success == 1){
+							if(data.data instanceof Object){
+								self.drawqsanwser(data.data); 
+							} 
+						}
+					}
+				})
+			}
+			
+			detail.prototype.savetalkcontent = function(value,contenttype,contentid){
+				var self = this,
+					userid = plus.storage.getItem("userId"),
+					arr = [];
+				util.ajax({
+					type:"post",
+					data:{userid:userid,value:value,contenttype:contenttype,contentid:contentid},
+					url:"/Ltdemo/talk/save.do",
+					success:function(data){
+						if(data.success == 1){
+							if(data.data == "success"){
+								arr.push('<li class="mui-table-view-cell mui-media">')
+							        arr.push('<a href="javascript:;">')
+							            arr.push('<img class="mui-media-object mui-pull-left" src='+plus.storage.getItem("userimg")+'>')
+							            arr.push('<div class="mui-media-body">')
+							               	arr.push(plus.storage.getItem("username")+'<span class="font-size"> · 刚刚 </span>')
+							                arr.push('<p class="mui-ellipsis">'+value+'</p>')
+							            arr.push('</div>')
+							        arr.push('</a>')
+							    arr.push('</li>')
+							    mui("#talkcontentwarpper")[0].innerHTML += arr.join("");
+								mui.toast('评论成功')
+							}else{
+								mui.toast('服务器错误')
+							}
+						}
+					}
+				})
+				
+				util.ajax({
+					type:"post",
+					data:{contentid:contentid},
+					url:"/Ltdemo/question/answerand.do",
+					success:function(data){
+						if(data.success == 1){
+								mui.toast('评论成功')
+							}else{
+								mui.toast('服务器错误')
+							}
+						}
+				})
+				
+				
+			}
+			
+			
+			detail.prototype.seeanlove = function(lovetype,targetId){
+				var value = plus.storage.getItem("userId"),
+					url,
+					message;
+				if(value!==null){
+					if(lovetype == "see"){
+						url = "/Ltdemo/love/savesee.do";
+						message = "关注成功"
+					}else{
+						url = "/Ltdemo/love/savelove.do";
+						message = "收藏成功"
+					}
+					util.ajax({
+							type:"post",
+							data:{userid:value,contentid:targetId},
+							url:url,
+							success:function(data){
+								console.log(data.data);
+								if(data.data == "success"){
+									mui.toast(message)
+								}
+							}
+					});
+				}else{
+					mui.openWindow({
+						url: 'login.html',
+						id: 'login',
+						preload: true,
+						show: {
+							aniShow: 'pop-in'
+						},
+						styles: {
+							popGesture: 'hide'
+						},
+						waiting: {
+							autoShow: false
+						}
+					});
+				}
+			}
+			
+			
+			
+			
+			detail.prototype.btndraw = function(arr){
+				var self = this;
+				self.btnbox.innerHTML = arr.join("");
+			}
+			
+			detail.prototype.getqdjson = function(targetId,url){
+				var self = this;
+				util.ajax({
+					type:"post",
+					data:{id:targetId},
+					url:url,
+					success:function(data){
+						if(data.success===1){
+							if(data.data instanceof Object){
+								if(data.type=="question"){
+									self.drawdetail(data.data);
+								}else if(data.type == "content"){
+									self.drawcdetail(data.data);
+								}/*else if(data.type == "wiki"){
+									self.drawwdetail(data.data);
+								}*/
+							}else if(data.data == "fail"){
+								mui.alert('查询内容失败','错误！','确定',function (e) {
+								   e.index
+								},'div') 
+							}else if(data.data == "null"){
+								mui.alert('内容为空','错误！','确定',function (e) {
+								   e.index
+								},'div') 
+							}else{
+								mui.alert('未知错误','错误！','确定',function (e) {
+								   e.index
+								},'div') 
+							}
+						}else{
+							mui.alert('服务器异常','错误！','确定',function (e) {
+								   e.index
+							},'div') 
+						}
+					}
+				})
+			}
+			
+			
+			detail.prototype.drawqsanwser = function(arr){
+				var self = this, 
+					arrstr=[];
+				for (var i=0; i<arr.length; i++) {
+					arrstr.push('<li class="mui-table-view-cell mui-media">')
+				        arrstr.push('<a href="javascript:;">')
+				            arrstr.push('<img class="mui-media-object mui-pull-left" src='+arr[i].userimg+'>')
+				            arrstr.push('<div class="mui-media-body">')
+				               	arrstr.push(arr[i].username+'<span class="font-size"> · '+util.formatMsgTime(arr[i].creatTime,arr[i].nowtime)+' </span>')
+				                arrstr.push('<p class="mui-ellipsis">'+arr[i].content+'</p>')
+				            arrstr.push('</div>')
+				        arrstr.push('</a>')
+				    arrstr.push('</li>')
+				    mui("#talkcontentwarpper")[0].innerHTML = arrstr.join("");
+				};
+			}
+			
+			detail.prototype.drawcdetail = function(data){
+				var self = this;
+				arr = [];
+				arr.push('<h4 style="text-align:center;">'+data.title+'</h4>');
+				arr.push('<div class="mui-tag">');
+				arr.push('<a>'+data.keywords+'</a>');
+				arr.push('<div>');
+				arr.push('<p>'+data.content+'</p>');
+				arr.push('</div>');
+				arr.push('<div class="mui-article-author">');
+				arr.push('<a href="javascript:;">作者 ：'+data.author+'</a> ');
+				arr.push('<span id="aticleTime">');
+				arr.push(util.getLocalTime(data.creatTime)+'发表');
+				arr.push('</span>');
+				arr.push('</div>');
+				self.contentbox.innerHTML = arr.join("");
+			}
+			
+			
+			detail.prototype.drawdetail = function(data){
+				var self = this,
+					arr = [];
+				arr.push('<h4>'+data.tittle+'</h4>');
+				arr.push('<div class="mui-tag">');
+				arr.push('<a>'+data.tag+'</a>');
+				arr.push('<div>');
+				arr.push('<p>'+data.content+'</p>');
+				arr.push('</div>');
+				arr.push('<div class="mui-article-author">');
+				arr.push('<a href="javascript:;">'+data.username+'</a> ');
+				arr.push('<span id="aticleTime">');
+				arr.push(util.getLocalTime(data.creatTime)+'提问');
+				arr.push('</span>');
+				arr.push('</div>');
+				self.contentbox.innerHTML = arr.join("");
+			}
+			
+			
+			/*detail.prototype.drawwdetail = function(data){
+				var self = this;
+					arr=[];
+				arr.push('<h4 style="text-align:center;">'+data.tittle+'</h4>');
+				arr.push('<div class="mui-tag">');
+				arr.push('<a>'+data.tag+'</a>'); 
+				arr.push('<div>');
+				arr.push('<p>'+data.content+'</p>');
+				arr.push('</div>');
+				arr.push('<div class="mui-article-author">');
+				arr.push('<span id="aticleTime">');
+				arr.push(util.getLocalTime(data.creatTime)+'创建');
+				arr.push('</span>');
+				arr.push('</div>');
+				self.contentbox.innerHTML = arr.join("");
+			}
+			*/
+			
+			var d = new detail();
+			d.main();
+			
+		</script>
+	</body>
+
+</html>

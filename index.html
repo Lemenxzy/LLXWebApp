@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+    <link href="css/mui.min.css" rel="stylesheet"/>
+    <link href="css/icons-extra.css" rel="stylesheet" />
+   	<link href="css/index.css" rel="stylesheet"/>
+</head>
+<body>
+	<div id="offCanvasWrapper" class="mui-off-canvas-wrap mui-draggable">
+		<!--侧滑菜单部分-->
+		<aside id="offCanvasSide" class="mui-off-canvas-left">
+			<div id="offCanvasSideScroll" class="mui-scroll-wrapper">
+				<div class="mui-scroll">
+					<div class="content">
+						<div class="userwrap">
+							
+						</div>
+						<div class="usernav">
+							<ul class="mui-table-view mylikenav">
+							    <li class="mui-table-view-cell">
+							    	<a href="javascript:void(0)" data-mydata="mylove" class="mybtn"> 
+							    		<span class="mui-icon mui-icon-star"></span> 我的收藏
+							    	</a>
+							    </li>
+							    <li class="mui-table-view-cell">
+							    	<a href="javascript:void(0)" data-mydata="mysee" class="mybtn">
+							    		<span class="mui-icon-extra mui-icon-extra-heart"></span> 我的关注
+							    	</a>
+							    </li>
+							</ul>
+							<ul class="mui-table-view myqsnav">
+							    <li class="mui-table-view-cell">
+							    	<a href="javascript:void(0)" data-mydata="myquestion" class="mybtn">
+							    		<span class="mui-icon mui-icon-help"></span> 我的提问
+							    	</a>
+							    </li>
+							    <li class="mui-table-view-cell">
+							    	<a href="javascript:void(0)" data-mydata="myanswer" class="mybtn">
+							    		<span class="mui-icon-extra mui-icon-extra-lamp"></span> 我的回答
+							    	</a>
+							    </li>
+							    <li class="mui-table-view-cell">
+							    	<a href="javascript:void(0)" data-mydata="mycontent" class="mybtn">
+							    		<span class="mui-icon-extra mui-icon-extra-order"></span> 我的文章
+							    	</a>
+							    </li>
+							</ul>
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</aside>
+		<!--主界面部分-->
+		<div class="mui-inner-wrap">
+			<!--顶部头-->
+			<header class="mui-bar mui-bar-nav">
+				<a href="#offCanvasSide" class="mui-icon mui-action-menu mui-icon-bars mui-pull-left"></a>
+				<div id="headerbox">
+					<a href="#popover" class="mui-icon mui-icon-plusempty mui-pull-right"></a>
+					<a href="javascript:void(0)" class="mui-icon mui-icon-search mui-pull-right search"></a>
+					<a href="javascript:void(0)" class="mui-icon mui-icon-extra mui-icon-extra-rank mui-pull-right echarts"></a>
+				</div>
+			</header> 
+			
+			
+			<div id="offCanvasContentScroll" class="mui-content mui-scroll-wrapper">
+				<div class="mui-content-padded">
+					<div id="slider" class="mui-slider mui-fullscreen">
+						<div id="sliderSegmentedControl" class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted mui-segmented-control">
+							<a class="mui-control-item" href="#item1mobile">
+								问题
+							</a>
+									<a class="mui-control-item" href="#item2mobile">
+								文章
+							</a>
+									<a class="mui-control-item" href="#item3mobile">
+								话题
+							</a>
+						</div>
+						<div id="sliderProgressBar" class="mui-slider-progress-bar mui-col-xs-4"></div>
+						<div class="mui-slider-group my-slider-group" id="itemwrapper">
+							<div id="item1mobile" class="mui-slider-item mui-control-content mui-active">
+								<div id="scroll1" class="mui-scroll-wrapper">
+									<div class="mui-scroll">
+										<ul class="mui-table-view qustion-list" data-content="question">
+											     
+										</ul>
+									</div>
+								</div> 
+							</div>
+							<div id="item2mobile" class="mui-slider-item mui-control-content"> 
+								<div id="scroll2" class="mui-scroll-wrapper content-list">
+									<div class="mui-scroll">
+										<ul class="mui-table-view mscontent-list" data-content="mscontent">
+											  
+										</ul>
+									</div>
+								</div>
+							</div>
+							<div id="item3mobile" class="mui-slider-item mui-control-content">
+								<div id="scroll3" class="mui-scroll-wrapper wiki-list">
+									<div class="mui-scroll">
+										<ul class="mui-table-view wiki-list" data-content="wiki">
+											   
+										</ul>
+									</div>
+								</div>
+		
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- off-canvas backdrop -->
+			<div class="mui-off-canvas-backdrop"></div>
+	</div>
+    </div>
+    <!--描述：弹出菜单-->
+	<div id="popover" class="mui-popover">
+	  <ul class="mui-table-view">
+	    <li class="mui-table-view-cell"><a href="javascript:void(0)" class="wirtenav" data-mydata="question">提问题</a></li>
+	    <li class="mui-table-view-cell"><a href="javascript:void(0)" class="wirtenav" data-mydata="content">写文章</a></li>
+	  </ul>
+	</div>
+	<script src="js/mui.min.js"></script>
+	<script src="js/mui.pullToRefresh.js"></script>
+	<script src="js/mui.pullToRefresh.material.js"></script>
+	<script src="js/util.js"></script>
+	<script src="js/indexblank.js"></script>
+	<script type="text/javascript">
+		var index = new index.fn();
+		index.main();  
+	</script>
+</body>
+</html>
